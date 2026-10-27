@@ -4,10 +4,11 @@ Lo que no pude hacer solo (permisos o decisiones tuyas). Marca cada punto al ter
 
 ## Bloqueantes para publicar
 
-- [ ] **Crear el repositorio `clima-ec` en GitHub** (público). La integración de esta sesión no tiene permiso
-      para crear repos (`403 Resource not accessible by integration`). Créalo vacío, sin README, o dame permiso.
-- [ ] **Subir el código** (`git remote add origin ... && git push -u origin main`) o decirme que lo suba.
-- [ ] **Desplegar en Vercel**: importar el repo en vercel.com/new (detecta Vite solo). Probar `/api/enso`.
+- [x] Repositorio `clima-ec` creado y código subido.
+- [ ] **Desplegar en Vercel**: la integración de esta sesión recibió `403` al crear el proyecto. Entra a
+      vercel.com/new, importa `PaulMoralesG/clima-ec` (detecta Vite solo; no hace falta configurar nada) y, si no
+      aparece el repo, da acceso a la app de GitHub de Vercel desde Settings > Git. Luego prueba `/api/enso`.
+- [ ] Revisar que la CI de GitHub Actions (pestaña Actions) quede en verde.
 
 ## Antes de compartirla con otras personas
 
