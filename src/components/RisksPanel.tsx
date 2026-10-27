@@ -15,6 +15,7 @@ import { fetchMarine, maxOf, waveLevel } from '../lib/marine';
 import { fetchQuakes } from '../lib/quakes';
 import { shortDate } from '../lib/format';
 import type { Place, RiskLevel } from '../lib/types';
+import ReportsCard from './ReportsCard';
 
 const LABEL: Record<RiskLevel, string> = {
   verde: 'Normal',
@@ -190,6 +191,7 @@ export default function RisksPanel({ place, today }: { place: Place; today: stri
       <FloodCard place={place} today={today} />
       <MarineCard place={place} />
       <QuakesCard place={place} />
+      <ReportsCard place={place} />
     </>
   );
 }

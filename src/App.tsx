@@ -201,7 +201,7 @@ export default function App() {
                   <Charts hourly={f.hourly} date={selected} />
                   <RainTrend daily={f.daily} today={today} />
                 </Suspense>
-                <SettingsCard settings={settings} onChange={updateSettings} />
+                <SettingsCard place={place} settings={settings} onChange={updateSettings} />
               </>
             )}
             {tab === 'mapa' &&

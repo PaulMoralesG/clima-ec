@@ -1,58 +1,48 @@
-# Fase 2 pendiente: backend (push y reportes)
+# Backend de la fase 2 (alertas push y reportes)
 
-Estas dos funciones necesitan una base de datos y secretos que no se pueden crear desde el navegador.
-Este documento deja el diseño listo para implementarlo cuando decidas el proyecto de Supabase.
+Implementado sobre un proyecto de Supabase **propio de ClimaEC** (`clima-ec`, región us-east-1), separado de
+cualquier otro proyecto. El navegador nunca habla con Supabase: todo pasa por funciones serverless de Vercel
+que usan la clave de servicio.
 
-## 1. Notificaciones push en segundo plano
-
-Hoy los avisos solo salen con la app abierta o instalada (`src/lib/notify.ts`). Para avisar con la app cerrada:
-
-1. Generar claves VAPID: `npx web-push generate-vapid-keys`. La pública va en el cliente (`VITE_VAPID_PUBLIC_KEY`);
-   la privada solo en variables de entorno del servidor (nunca en el repositorio).
-2. Tabla `push_subscriptions` en Supabase:
-
-```sql
-create table push_subscriptions (
-  id uuid primary key default gen_random_uuid(),
-  endpoint text not null unique,
-  p256dh text not null,
-  auth text not null,
-  latitude double precision not null,
-  longitude double precision not null,
-  place_name text,
-  min_level text not null default 'naranja' check (min_level in ('amarillo','naranja','rojo')),
-  last_notified_key text,
-  created_at timestamptz not null default now()
-);
-alter table push_subscriptions enable row level security;
--- Sin políticas públicas: solo escribe la función serverless con la clave de servicio.
+```
+navegador ──> /api/subscribe | /api/unsubscribe | /api/reports ──> Supabase (RLS activado, sin acceso público)
+GitHub Actions (cada hora) ──> /api/cron/notify ──> Open-Meteo ──> web-push ──> dispositivos
 ```
 
-3. Función serverless `api/subscribe.ts` (valida y guarda la suscripción) y un cron de Vercel
-   (`vercel.json` -> `crons`, cada hora) que consulta Open-Meteo por suscripción, calcula el riesgo con
-   `src/lib/risk.ts` y envía con `web-push` solo si cambió el nivel (`last_notified_key`).
-4. En el cliente: `registration.pushManager.subscribe({ applicationServerKey })` tras el permiso del usuario.
+## Tablas (migración `create_push_and_reports`)
 
-Privacidad: se guardan coordenadas aproximadas (redondear a 2 decimales) y se debe ofrecer "darse de baja".
+- `push_subscriptions`: endpoint, claves, **coordenadas redondeadas a ~1 km**, nivel mínimo (`naranja` por defecto) y
+  `last_notified_key` (evita repetir el mismo aviso: fecha + nivel).
+- `reports`: tipo, nota (≤280), coordenadas, `status` (`pendiente` / `publicado` / `rechazado`) y `ip_hash`.
 
-## 2. Reportes ciudadanos ("calle inundada aquí")
+Ambas tienen RLS activado **sin políticas** y sin permisos para `anon`/`authenticated`. Es intencional: el aviso
+INFO "RLS enabled, no policy" del linter es lo esperado.
 
-```sql
-create table reports (
-  id uuid primary key default gen_random_uuid(),
-  kind text not null check (kind in ('inundacion','deslizamiento','via_cerrada','otro')),
-  note text check (char_length(note) <= 280),
-  latitude double precision not null,
-  longitude double precision not null,
-  photo_path text,
-  status text not null default 'pendiente' check (status in ('pendiente','publicado','rechazado')),
-  created_at timestamptz not null default now()
-);
-alter table reports enable row level security;
-create policy "leer publicados" on reports for select using (status = 'publicado');
-create policy "crear pendientes" on reports for insert with check (status = 'pendiente');
-```
+## Funciones (`api/`)
 
-Requisitos antes de abrirlo al público: moderación (nadie ve un reporte hasta aprobarlo), límite de tasa por IP,
-validación de que el punto esté en Ecuador, fotos en un bucket con tamaño máximo y sin datos EXIF, y aviso de que
-los reportes no sustituyen al ECU 911.
+| Ruta                       | Qué hace                                                                                                                            |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/subscribe`      | Valida y guarda la suscripción. Solo acepta endpoints de FCM, Mozilla, Apple y Windows (evita SSRF) y puntos dentro de Ecuador.     |
+| `POST /api/unsubscribe`    | Da de baja el dispositivo.                                                                                                          |
+| `GET /api/reports?lat&lon` | Reportes **publicados** de las últimas 48 h en ~33 km.                                                                              |
+| `POST /api/reports`        | Crea un reporte `pendiente` (máx. 5 por hora por IP, que se guarda con hash).                                                       |
+| `GET /api/cron/notify`     | Exige `Authorization: Bearer $CRON_SECRET`. Calcula el riesgo por zona y envía los avisos. Borra suscripciones caducadas (404/410). |
+
+La lógica está en `api/_lib/` (validación y `runNotifier`) y tiene pruebas unitarias con dependencias simuladas.
+
+## Puesta en marcha (lo hace el dueño del proyecto)
+
+1. **Claves VAPID**: `npx web-push generate-vapid-keys`.
+2. **Variables en Vercel** (Settings > Environment Variables, entorno Production) y luego **Redeploy**:
+   `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (Supabase > Project Settings > API > `service_role`, **secreta**),
+   `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`mailto:tu-correo`), `CRON_SECRET` (texto aleatorio largo),
+   `REPORT_SALT` (otro texto aleatorio) y `VITE_VAPID_PUBLIC_KEY` (la misma clave pública; el cliente la lee al compilar).
+3. **Secretos en GitHub** (Settings > Secrets and variables > Actions): `APP_URL` (URL de producción) y el mismo `CRON_SECRET`.
+   El workflow `notify.yml` llama al endpoint cada hora. GitHub lo pausa si el repo pasa 60 días sin actividad.
+4. **Moderar reportes**: Supabase > Table Editor > `reports` > cambia `status` a `publicado` (o `rechazado`).
+
+## Pendiente de esta parte
+
+- Fotos en los reportes (requiere un bucket de Storage con límite de tamaño y limpieza de EXIF).
+- Panel de moderación propio (hoy se modera desde el Table Editor).
+- Poner un `Retry`/métricas al cron si el volumen crece (hoy procesa hasta 5000 suscripciones por ejecución).

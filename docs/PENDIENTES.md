@@ -24,9 +24,19 @@ Lo que no pude hacer solo (permisos o decisiones tuyas). Marca cada punto al ter
 - [ ] Confirmar teléfonos de emergencia locales (la app incluye ECU 911 y enlaces oficiales).
 - [ ] Dominio propio (opcional) y nombre definitivo de la marca ("ClimaEC" es provisional).
 
-## Para la fase 2
+## Para activar la fase 2 (alertas push y reportes)
 
-- [ ] Decidir si usamos tu proyecto de Supabase existente ("Finanzas") u otro nuevo para alertas push
-      (crear uno nuevo puede tener costo). No toqué tu proyecto actual.
+La base de datos ya está creada (proyecto Supabase `clima-ec`, separado de Finanzas). Falta configurar los secretos,
+que no puedo ver ni poner yo. Pasos detallados en `docs/FASE2-BACKEND.md`:
+
+- [ ] Generar las claves VAPID (`npx web-push generate-vapid-keys`).
+- [ ] Copiar la `service_role` key de Supabase (Project Settings > API) a las variables de Vercel. **Nunca** al repositorio.
+- [ ] Cargar las variables en Vercel (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `VAPID_*`, `CRON_SECRET`, `REPORT_SALT`, `VITE_VAPID_PUBLIC_KEY`) y redesplegar.
+- [ ] Crear los secretos `APP_URL` y `CRON_SECRET` en GitHub Actions para el aviso horario.
+- [ ] Probar en un celular real: activar "Alertas con la app cerrada" y lanzar el workflow "Alertas push" a mano.
+- [ ] Moderar los reportes que lleguen (Supabase > Table Editor > `reports` > `status`).
+- [ ] Antes de abrir los reportes al público: política de privacidad (guardamos zona aproximada y un hash de IP).
+
+## Más adelante
+
 - [ ] Para las tiendas: cuenta de Google Play (pago único) y Apple Developer (anual).
-- [ ] Política de privacidad (obligatoria en tiendas y si guardas ubicaciones o envías notificaciones).

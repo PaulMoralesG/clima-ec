@@ -1,0 +1,25 @@
+name: Alertas push
+
+# Vercel Hobby solo permite crons diarios, así que el aviso horario lo dispara GitHub Actions.
+# Requiere los secretos del repositorio APP_URL (p. ej. https://clima-ec.vercel.app) y CRON_SECRET.
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Llamar al endpoint de avisos
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "Faltan los secretos APP_URL y/o CRON_SECRET; no se envía nada."
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error --max-time 60 \
+            -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/notify"

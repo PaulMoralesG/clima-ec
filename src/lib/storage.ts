@@ -28,12 +28,16 @@ export const saveLastPlace = (place: Place): void => write(LAST, place);
 export interface Settings {
   lowData: boolean;
   notify: boolean;
+  push: boolean;
+  pushPlace: string | null;
 }
 
 const SETTINGS = 'clima-ec:settings';
 export const loadSettings = (): Settings => ({
   lowData: false,
   notify: false,
+  push: false,
+  pushPlace: null,
   ...read<Partial<Settings>>(SETTINGS, {}),
 });
 export const saveSettings = (s: Settings): void => write(SETTINGS, s);

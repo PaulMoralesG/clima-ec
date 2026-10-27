@@ -15,7 +15,8 @@ automáticamente (si no, muestra Guayaquil), funciona en el navegador y se puede
 - Panel **El Niño**: índice ONI de NOAA en vivo, fase, intensidad y qué significa para la Costa.
 - **Riesgos**: crecida de ríos (GloFAS), oleaje y nivel del mar en la costa, y sismos recientes (USGS).
 - Compartir el pronóstico por WhatsApp o el menú del celular.
-- **Modo ahorro de datos** y avisos del navegador cuando el riesgo es alto o muy alto (mientras la app está abierta o instalada).
+- **Modo ahorro de datos** y avisos del navegador cuando el riesgo es alto o muy alto.
+- **Alertas push con la app cerrada** (opt-in; guardan solo tu zona aproximada) y **reportes de la comunidad** moderados.
 - Lugares guardados, mochila de emergencia (checklist) y llamada al ECU 911.
 - PWA instalable con caché sin conexión, modo claro/oscuro, accesible (contraste, teclado, lectores de pantalla).
 
@@ -23,7 +24,7 @@ automáticamente (si no, muestra Guayaquil), funciona en el navegador y se puede
 
 React 19 · TypeScript · Vite · vite-plugin-pwa (Workbox) · MapLibre GL · Recharts · Vitest · ESLint · Prettier.
 Datos: [Open-Meteo](https://open-meteo.com) (pronóstico, ríos, mar y geocodificación), RainViewer (radar), NOAA CPC (ONI), USGS (sismos),
-OpenStreetMap/Nominatim (mapa y direcciones). Una función serverless (`api/enso.ts`) evita el bloqueo CORS de NOAA.
+OpenStreetMap/Nominatim (mapa y direcciones). Alertas y reportes usan Supabase (base de datos) + Web Push; ver `docs/FASE2-BACKEND.md`. Una función serverless (`api/enso.ts`) evita el bloqueo CORS de NOAA.
 
 ## Desarrollo
 

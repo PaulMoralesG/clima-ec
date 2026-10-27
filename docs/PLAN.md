@@ -18,8 +18,9 @@
 - [x] Botón de compartir por WhatsApp / menú nativo.
 - [x] Modo ahorro de datos.
 - [x] Avisos del navegador por riesgo alto (solo con la app abierta o instalada).
-- [ ] Notificaciones push en segundo plano: ver `docs/FASE2-BACKEND.md` (requiere claves VAPID y Supabase).
-- [ ] Reportes ciudadanos con foto: ver `docs/FASE2-BACKEND.md` (requiere Supabase y moderación).
+- [x] Notificaciones push en segundo plano (código y base de datos listos; falta configurar claves, ver `docs/FASE2-BACKEND.md`).
+- [x] Reportes ciudadanos con moderación (sin fotos todavía).
+- [ ] Fotos en los reportes.
 - [ ] Volcanes (IGEPN no publica una API estable; evaluar enlaces o scraping).
 - [ ] Calibrar umbrales por provincia con datos históricos.
 - [ ] Pruebas E2E con Playwright en CI.
