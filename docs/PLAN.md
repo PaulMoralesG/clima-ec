@@ -12,13 +12,15 @@
 
 ## Fase 2
 
-- [ ] Notificaciones push por umbral de lluvia (Supabase + Web Push + cron).
-- [ ] Riesgo de inundación y caudal de ríos (Open-Meteo Flood API).
-- [ ] Marea y oleaje en la costa (Open-Meteo Marine).
-- [ ] Sismos recientes (USGS) y volcanes.
-- [ ] Reportes ciudadanos con foto ("calle inundada aquí").
-- [ ] Botón de compartir por WhatsApp.
-- [ ] Modo bajo consumo de datos.
+- [x] Riesgo de inundación y caudal de ríos (Open-Meteo Flood API).
+- [x] Marea y oleaje en la costa (Open-Meteo Marine).
+- [x] Sismos recientes (USGS).
+- [x] Botón de compartir por WhatsApp / menú nativo.
+- [x] Modo ahorro de datos.
+- [x] Avisos del navegador por riesgo alto (solo con la app abierta o instalada).
+- [ ] Notificaciones push en segundo plano: ver `docs/FASE2-BACKEND.md` (requiere claves VAPID y Supabase).
+- [ ] Reportes ciudadanos con foto: ver `docs/FASE2-BACKEND.md` (requiere Supabase y moderación).
+- [ ] Volcanes (IGEPN no publica una API estable; evaluar enlaces o scraping).
 - [ ] Calibrar umbrales por provincia con datos históricos.
-- [ ] Pruebas E2E con Playwright.
+- [ ] Pruebas E2E con Playwright en CI.
 - [ ] Empaquetar con Capacitor para Play Store / App Store.

@@ -7,9 +7,10 @@ interface Props {
   saved: boolean;
   detected: boolean;
   onToggleSave: () => void;
+  onShare: () => void;
 }
 
-export default function CurrentCard({ place, current, saved, detected, onToggleSave }: Props) {
+export default function CurrentCard({ place, current, saved, detected, onToggleSave, onShare }: Props) {
   const w = describeWeather(current.weatherCode);
   return (
     <section className="card current">
@@ -22,15 +23,20 @@ export default function CurrentCard({ place, current, saved, detected, onToggleS
           </p>
           {place.address && <p className="muted small">{place.address}</p>}
         </div>
-        <button
-          type="button"
-          className="btn"
-          onClick={onToggleSave}
-          aria-pressed={saved}
-          aria-label={saved ? 'Quitar de guardados' : 'Guardar lugar'}
-        >
-          {saved ? '★' : '☆'}
-        </button>
+        <div className="actions">
+          <button
+            type="button"
+            className="btn"
+            onClick={onToggleSave}
+            aria-pressed={saved}
+            aria-label={saved ? 'Quitar de guardados' : 'Guardar lugar'}
+          >
+            {saved ? '★' : '☆'}
+          </button>
+          <button type="button" className="btn" onClick={onShare} aria-label="Compartir pronóstico">
+            📤
+          </button>
+        </div>
       </div>
       <div className="current-main">
         <span className="current-emoji" aria-hidden="true">

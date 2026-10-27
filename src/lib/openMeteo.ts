@@ -32,13 +32,13 @@ interface RawForecast {
   };
 }
 
-export function forecastUrl(lat: number, lon: number): string {
+export function forecastUrl(lat: number, lon: number, lowData = false): string {
   const p = new URLSearchParams({
     latitude: lat.toFixed(4),
     longitude: lon.toFixed(4),
     timezone: TIMEZONE,
-    past_days: '7',
-    forecast_days: '16',
+    past_days: lowData ? '3' : '7',
+    forecast_days: lowData ? '7' : '16',
     current:
       'temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,wind_speed_10m,weather_code,is_day',
     hourly: 'precipitation,precipitation_probability,temperature_2m',
@@ -83,8 +83,13 @@ export function parseForecast(raw: RawForecast, now = Date.now()): Forecast {
   };
 }
 
-export async function fetchForecast(lat: number, lon: number, signal?: AbortSignal): Promise<Forecast> {
-  const res = await fetch(forecastUrl(lat, lon), { signal });
+export async function fetchForecast(
+  lat: number,
+  lon: number,
+  signal?: AbortSignal,
+  lowData = false,
+): Promise<Forecast> {
+  const res = await fetch(forecastUrl(lat, lon, lowData), { signal });
   if (!res.ok) throw new Error(`Open-Meteo respondió ${res.status}`);
   return parseForecast((await res.json()) as RawForecast);
 }

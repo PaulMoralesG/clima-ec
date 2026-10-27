@@ -84,7 +84,10 @@ export function RainTrendChart({ daily, today }: { daily: DailyPoint[]; today: s
   const todayLabel = data.find((d) => d.date === today)?.fecha;
   return (
     <section className="card" aria-label="Lluvia acumulada">
-      <h2>Lluvia: últimos 7 días y próximos 16</h2>
+      <h2>
+        Lluvia: últimos {daily.filter((d) => d.isPast).length} días y próximos{' '}
+        {daily.filter((d) => !d.isPast).length}
+      </h2>
       <p className="muted">
         Acumulado 7 días atrás: <strong>{past.toFixed(1)} mm</strong> · Próximos 7 días:{' '}
         <strong>{next7.toFixed(1)} mm</strong>

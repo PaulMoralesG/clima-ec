@@ -489,3 +489,75 @@ a {
     transition: none !important;
   }
 }
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 6px;
+  vertical-align: middle;
+  color: #fff;
+}
+.badge-verde {
+  background: var(--verde);
+}
+.badge-amarillo {
+  background: #8a6a00;
+}
+.badge-naranja {
+  background: #b85600;
+}
+.badge-rojo {
+  background: var(--rojo);
+}
+.quakes {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.quakes li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.mag {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #fff;
+}
+.mag-amarillo {
+  background: #8a6a00;
+}
+.mag-naranja {
+  background: #b85600;
+}
+.mag-rojo {
+  background: var(--rojo);
+}
+.setting {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  cursor: pointer;
+}
+.setting input {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  margin-top: 2px;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}

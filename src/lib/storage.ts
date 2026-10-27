@@ -24,3 +24,16 @@ export const loadSavedPlaces = (): Place[] => read<Place[]>(KEY, []);
 export const saveSavedPlaces = (places: Place[]): void => write(KEY, places);
 export const loadLastPlace = (): Place | null => read<Place | null>(LAST, null);
 export const saveLastPlace = (place: Place): void => write(LAST, place);
+
+export interface Settings {
+  lowData: boolean;
+  notify: boolean;
+}
+
+const SETTINGS = 'clima-ec:settings';
+export const loadSettings = (): Settings => ({
+  lowData: false,
+  notify: false,
+  ...read<Partial<Settings>>(SETTINGS, {}),
+});
+export const saveSettings = (s: Settings): void => write(SETTINGS, s);

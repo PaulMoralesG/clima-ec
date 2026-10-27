@@ -13,13 +13,16 @@ automáticamente (si no, muestra Guayaquil), funciona en el navegador y se puede
 - Pronóstico por hora y a 16 días, con selección de fecha; lluvia de los últimos 7 días y próximos 16.
 - **Semáforo de riesgo** (verde / amarillo / naranja / rojo) según lluvia diaria y horaria.
 - Panel **El Niño**: índice ONI de NOAA en vivo, fase, intensidad y qué significa para la Costa.
+- **Riesgos**: crecida de ríos (GloFAS), oleaje y nivel del mar en la costa, y sismos recientes (USGS).
+- Compartir el pronóstico por WhatsApp o el menú del celular.
+- **Modo ahorro de datos** y avisos del navegador cuando el riesgo es alto o muy alto (mientras la app está abierta o instalada).
 - Lugares guardados, mochila de emergencia (checklist) y llamada al ECU 911.
 - PWA instalable con caché sin conexión, modo claro/oscuro, accesible (contraste, teclado, lectores de pantalla).
 
 ## Stack
 
 React 19 · TypeScript · Vite · vite-plugin-pwa (Workbox) · MapLibre GL · Recharts · Vitest · ESLint · Prettier.
-Datos: [Open-Meteo](https://open-meteo.com) (pronóstico y geocodificación), RainViewer (radar), NOAA CPC (ONI),
+Datos: [Open-Meteo](https://open-meteo.com) (pronóstico, ríos, mar y geocodificación), RainViewer (radar), NOAA CPC (ONI), USGS (sismos),
 OpenStreetMap/Nominatim (mapa y direcciones). Una función serverless (`api/enso.ts`) evita el bloqueo CORS de NOAA.
 
 ## Desarrollo

@@ -4,22 +4,35 @@ import RiskBanner from './components/RiskBanner';
 import CurrentCard from './components/CurrentCard';
 import DailyList from './components/DailyList';
 import SafetyPanel from './components/SafetyPanel';
+import SettingsCard from './components/SettingsCard';
 import { useEnso, useForecast } from './hooks';
 import { DEFAULT_PLACE, detectPlace, isInEcuador, reverseGeocode } from './lib/geocode';
+import { maybeNotify } from './lib/notify';
 import { worstRisk } from './lib/risk';
-import { loadLastPlace, loadSavedPlaces, saveLastPlace, saveSavedPlaces } from './lib/storage';
+import { shareForecast, shareMessage } from './lib/share';
+import {
+  loadLastPlace,
+  loadSavedPlaces,
+  loadSettings,
+  saveLastPlace,
+  saveSavedPlaces,
+  saveSettings,
+  type Settings,
+} from './lib/storage';
 import type { Place } from './lib/types';
 
 const ElNinoPanel = lazy(() => import('./components/ElNinoPanel'));
+const RisksPanel = lazy(() => import('./components/RisksPanel'));
 const MapView = lazy(() => import('./components/MapView'));
 const Charts = lazy(() => import('./components/Charts').then((m) => ({ default: m.HourlyChart })));
 const RainTrend = lazy(() => import('./components/Charts').then((m) => ({ default: m.RainTrendChart })));
 
-type Tab = 'resumen' | 'mapa' | 'nino' | 'seguridad';
+type Tab = 'resumen' | 'mapa' | 'riesgos' | 'nino' | 'seguridad';
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'resumen', label: 'Resumen', icon: '🌦️' },
   { id: 'mapa', label: 'Mapa', icon: '🗺️' },
-  { id: 'nino', label: 'El Niño', icon: '🌊' },
+  { id: 'riesgos', label: 'Riesgos', icon: '🌊' },
+  { id: 'nino', label: 'El Niño', icon: '🌡️' },
   { id: 'seguridad', label: 'Seguridad', icon: '🛟' },
 ];
 
@@ -31,7 +44,9 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const forecast = useForecast(place);
+  const [settings, setSettings] = useState<Settings>(loadSettings);
+  const [mapRequested, setMapRequested] = useState(false);
+  const forecast = useForecast(place, settings.lowData);
   const enso = useEnso();
 
   const [locating, setLocating] = useState(() => place === null);
@@ -98,10 +113,29 @@ export default function App() {
     saveSavedPlaces(next);
   };
 
+  const updateSettings = (next: Settings) => {
+    setSettings(next);
+    saveSettings(next);
+  };
+
   const f = forecast.data;
   const today = f?.current.time.slice(0, 10) ?? '';
   const selected = selectedDate ?? today;
   const worst = useMemo(() => (f ? worstRisk(f.daily, f.hourly, today, 3) : null), [f, today]);
+
+  // Avisos del navegador (opt-in): solo para riesgo alto o muy alto, una vez por lugar, día y nivel.
+  useEffect(() => {
+    if (settings.notify && place && worst) void maybeNotify(place, worst.risk, worst.date);
+  }, [settings.notify, place, worst]);
+
+  const share = () => {
+    if (!place || !f || !worst) return;
+    const todayRain = f.daily.find((d) => d.date === today)?.precipitationSum ?? 0;
+    void shareForecast(
+      shareMessage(place, worst.risk, todayRain, window.location.origin),
+      window.location.origin,
+    );
+  };
 
   return (
     <div className="app">
@@ -154,6 +188,7 @@ export default function App() {
                   saved={isSaved}
                   detected={detected}
                   onToggleSave={toggleSave}
+                  onShare={share}
                 />
                 <DailyList
                   daily={f.daily}
@@ -166,11 +201,28 @@ export default function App() {
                   <Charts hourly={f.hourly} date={selected} />
                   <RainTrend daily={f.daily} today={today} />
                 </Suspense>
+                <SettingsCard settings={settings} onChange={updateSettings} />
               </>
             )}
-            {tab === 'mapa' && (
-              <Suspense fallback={<p className="muted">Cargando mapa…</p>}>
-                <MapView place={place} onPick={pickPoint} />
+            {tab === 'mapa' &&
+              (settings.lowData && !mapRequested ? (
+                <section className="card">
+                  <h2>Mapa de lluvia</h2>
+                  <p className="muted">
+                    Modo ahorro de datos activo: el mapa y el radar no se cargan hasta que lo pidas.
+                  </p>
+                  <button type="button" className="btn" onClick={() => setMapRequested(true)}>
+                    Cargar mapa
+                  </button>
+                </section>
+              ) : (
+                <Suspense fallback={<p className="muted">Cargando mapa…</p>}>
+                  <MapView place={place} onPick={pickPoint} />
+                </Suspense>
+              ))}
+            {tab === 'riesgos' && (
+              <Suspense fallback={<p className="muted">Cargando…</p>}>
+                <RisksPanel place={place} today={today} />
               </Suspense>
             )}
             {tab === 'nino' && (
